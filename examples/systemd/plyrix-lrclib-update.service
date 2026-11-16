@@ -1,0 +1,41 @@
+# Example systemd user unit: keep a local LRCLIB on the newest official dump.
+#
+# Copy to ~/.config/systemd/user/ with plyrix-lrclib-update.timer, set the Environment lines below,
+# then:
+#   systemctl --user enable --now plyrix-lrclib-update.timer
+#
+# It runs scripts/lrclib-update.sh on the host, as the user who runs LRCLIB, because the script
+# stops and starts LRCLIB with that user's own compose rights and renames LRCLIB's files. So this
+# is a host unit, not the container's cron, and no container gets Docker's socket. plyrix itself
+# starts and stops nothing: the script runs plyrix only for the read-only check, verify and diff,
+# and to record which dump is live.
+#
+# PLYRIX is the plyrix command. With the package, leave it as below. With the container, use
+#   Environment="PLYRIX=docker compose -f %h/src/plyrix/compose.yaml run --rm --no-deps plyrix"
+# with MUSIC_ROOT and STATE_DIR set as for compose. --no-deps, as LRCLIB is down for part of a swap.
+#
+# Exit 75 means another update or a plyrix run was busy, and the next timer run tries again, so it
+# counts as success. A download, unpack and search index rebuild can take hours, so the start has
+# no timeout.
+#
+# With the follow-up on, as below: once a new dump is live, the script runs plyrix's ordinary
+# scan, which looks up only what the update could change, then a Plex refresh capped at
+# LRCLIB_PLEX_LIMIT albums, paced by plex_pace. The albums over the cap wait for the next
+# plex-refresh.
+[Unit]
+Description=plyrix: check for a newer LRCLIB dump, and load it
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+Environment=LRCLIB_DATA=/srv/lrclib
+Environment=PLYRIX=%h/.local/bin/plyrix
+Environment=LRCLIB_FOLLOW_UP=1
+Environment=LRCLIB_PLEX_LIMIT=100
+# Point this at your checkout of plyrix.
+ExecStart=%h/src/plyrix/scripts/lrclib-update.sh
+SuccessExitStatus=75
+TimeoutStartSec=infinity
+IOSchedulingClass=idle
+Nice=19

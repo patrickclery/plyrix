@@ -1,0 +1,50 @@
+/* plyrix's palette from Phase 04.1: a teal tile, white lines and a lime highlight. */
+:root {
+  --plyrix-tile: #115e59;
+  --plyrix-highlight: #a3ff3c;
+  --plyrix-line: rgba(255, 255, 255, 0.9);
+  --sl-color-accent-low: #0b3d3a;
+  --sl-color-accent: #115e59;
+  --sl-color-accent-high: #a3ff3c;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #ccfbf1;
+  --sl-color-accent: #115e59;
+  --sl-color-accent-high: #0b3d3a;
+}
+
+/* The landing page's hook: four lyric lines drawn in CSS, the third one now playing. No text. */
+.plyrix-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: 22rem;
+  box-sizing: border-box;
+  margin: 0 auto 2rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: var(--plyrix-tile);
+}
+
+.plyrix-lines span {
+  display: block;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--plyrix-line);
+  opacity: 0.55;
+}
+
+.plyrix-lines span:nth-child(2) {
+  width: 15rem;
+}
+
+.plyrix-lines span:nth-child(4) {
+  width: 12rem;
+}
+
+.plyrix-lines span.now {
+  height: 0.8rem;
+  background: var(--plyrix-highlight);
+  opacity: 1;
+}

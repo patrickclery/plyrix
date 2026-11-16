@@ -1,0 +1,10 @@
+# grype reads this from the repo root in CI's image job. Each ignore names the exact package
+# version it covers, so a base-image bump past that version ends the exception by itself.
+ignore:
+  # GHSA-vq78-g94j-3ppp: a hashlib FIPS enforcement regression in Python 3.14.10 only, which affects
+  # only OpenSSL in FIPS mode; the image doesn't run FIPS mode. Its fix, 3.14.11, isn't released
+  # as of 2026-11-16, so no python:3.14-slim-trixie digest has it.
+  - vulnerability: CVE-2026-119170
+    package:
+      name: python
+      version: 3.14.10

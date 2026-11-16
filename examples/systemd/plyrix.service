@@ -1,0 +1,23 @@
+# Example systemd user unit: one plyrix run, then a Plex refresh.
+#
+# Copy to ~/.config/systemd/user/ with plyrix.timer, then:
+#   systemctl --user enable --now plyrix.timer
+#
+# ExecStopPost runs the refresh after every run, successful or not, so sidecars a failed run did
+# write are still refreshed. Both steps take the state database's lock, so either one waits its
+# turn (exit 75) rather than running beside the other. With no plex_url set, plex-refresh exits 0.
+#
+# Settings come from plyrix's config file or PLYRIX_ variables. A system unit can hand over the
+# Plex token as a file with LoadCredential=plyrix_plex_token:PATH, which plyrix reads from
+# systemd's credentials directory.
+[Unit]
+Description=plyrix: write lyrics sidecars, then refresh Plex
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/plyrix run
+ExecStopPost=%h/.local/bin/plyrix plex-refresh
+IOSchedulingClass=idle
+Nice=19

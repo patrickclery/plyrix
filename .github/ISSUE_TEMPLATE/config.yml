@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/patrickclery/plyrix/security/advisories/new
+    about: Report security problems and conduct reports privately.
+  - name: Lyrics and legal
+    url: https://github.com/patrickclery/plyrix#lyrics-and-legal
+    about: How plyrix handles lyrics and the LRCLIB dump.
+  - name: Support policy
+    url: https://github.com/patrickclery/plyrix/blob/main/SUPPORT.md
+    about: What support to expect, and what to include when you ask.

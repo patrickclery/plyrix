@@ -1,0 +1,56 @@
+name: pages
+
+# Builds and checks the project site on every relevant change. It deploys to GitHub Pages only
+# from main, and only once the repository variable PLYRIX_PAGES is `on`, which is set at C4.
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "README.md", "assets/brand/**", ".github/workflows/pages.yml"]
+  pull_request:
+    paths: ["site/**", "README.md", "assets/brand/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Runs npm ci and npm run build (with its prebuild, the README split) in site/, then
+      # uploads site/dist as the Pages artefact.
+      - uses: withastro/action@a8b97df764791eb61fbf3338ef713b0e61ae05c5 # v6.1.4
+        with:
+          path: site
+          node-version: "24"
+          cache: "false"
+      - run: node --test 'site/scripts/*.test.mjs'
+      - run: python3 scripts/check_public_text.py --html site/dist
+      - run: python3 scripts/check_public_text.py site/src
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.PLYRIX_PAGES == 'on'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

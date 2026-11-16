@@ -1,0 +1,93 @@
+# plyrix's compose file: plyrix, and the LRCLIB server it needs as its lyrics source. Both images
+# are built locally here. Released plyrix images come from .github/workflows/release.yml at
+# ghcr.io/patrickclery/plyrix (run one with examples/compose.release.yaml); LRCLIB's image is
+# never published.
+#
+# LRCLIB is built from upstream's Git repository at a pinned commit, with upstream's own
+# Dockerfile, and never pulled from a registry. Docker accepts only a full 40-character SHA after
+# the '#'. To move the pin, change the SHA here and in README.md's install steps (a test holds them
+# equal), rebuild with `docker compose build lrclib`, and rerun the LRCLIB contract test.
+#
+# Variables:
+#   LRCLIB_DATA  LRCLIB's data directory (required), owned by LRCLIB_USER; see scripts/lrclib-setup.sh
+#   LRCLIB_USER  uid:gid LRCLIB runs as (default 1000:1000), as upstream's image runs as root
+#   LRCLIB_PORT  loopback port to publish (default 3300)
+#   MUSIC_ROOT       the library's real absolute path, with no symlink in it (required)
+#   STATE_DIR        plyrix's state folder on the host, owned by CONTAINER_USER (required)
+#   CONTAINER_USER   uid:gid plyrix runs as (default 1000:1000)
+#   CRON_SCHEDULE    when cron mode runs (default @weekly)
+#   DRAIN_SCHEDULE   when cron mode also runs `plyrix drain`, for albums the Lidarr hook queued
+#                    (default unset, so no drain)
+#   PLEX_TOKEN_FILE  the file holding the Plex token (default ./secrets/plyrix_plex_token)
+name: plyrix
+
+services:
+  lrclib:
+    build:
+      context: https://github.com/tranxuanthang/lrclib.git#e1d863afc430392c8b2f97bea72139292d498432
+    image: plyrix-lrclib:e1d863a
+    # Build, never pull. This rebuilds on every up, fetching the source from GitHub, so a start
+    # that must not need the network uses `up --no-build`, as scripts/lrclib-setup.sh does.
+    pull_policy: build
+    user: "${LRCLIB_USER:-1000:1000}"
+    ports:
+      # Loopback only. LRCLIB binds every interface inside the container.
+      - "127.0.0.1:${LRCLIB_PORT:-3300}:3300"
+    environment:
+      # SQLite's temp files go beside the database, not into the container's layer.
+      TMPDIR: /data/tmp
+    volumes:
+      - type: bind
+        source: "${LRCLIB_DATA:?set LRCLIB_DATA to LRCLIB's data directory}"
+        target: /data
+    healthcheck:
+      # /api/search answers 200 only once the search index is built. /api/get answers the
+      # probe with 404, which wget counts as a failure.
+      test:
+        - CMD
+        - wget
+        - -q
+        - -O
+        - /dev/null
+        - http://127.0.0.1:3300/api/search?artist_name=plyrix+preflight&track_name=plyrix+preflight
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      # The index build after a first load can take hours.
+      start_period: 12h
+    restart: unless-stopped
+
+  plyrix:
+    build: .
+    image: plyrix:local
+    pull_policy: build
+    user: "${CONTAINER_USER:-1000:1000}"
+    environment:
+      PLYRIX_LRCLIB_URL: http://lrclib:3300/api
+      PLYRIX_MUSIC_ROOT: "${MUSIC_ROOT:?set MUSIC_ROOT to the library's real absolute path}"
+      CRON_SCHEDULE: "${CRON_SCHEDULE:-@weekly}"
+      DRAIN_SCHEDULE: "${DRAIN_SCHEDULE:-}"
+    volumes:
+      # The library at the same absolute path as on the host, so the paths plyrix records stay
+      # valid for host and container runs alike. It is mounted once and writable, as sidecars sit
+      # beside the tracks; the write tripwire is the guard on it, and a second, read-only view is
+      # left out on purpose.
+      - "${MUSIC_ROOT}:${MUSIC_ROOT}"
+      - "${STATE_DIR:?set STATE_DIR to a folder plyrix's user owns}:/state"
+      # LRCLIB's data folder at its host path, read-only, so `plyrix doctor --lrclib-data` run
+      # through compose measures the disk it is on.
+      - "${LRCLIB_DATA}:${LRCLIB_DATA}:ro"
+      # config.toml goes in ./config/plyrix/.
+      - "./config:/config:ro"
+    # The token reaches /run/secrets/plyrix_plex_token as a file, never the environment, where
+    # docker inspect would show it.
+    secrets:
+      - plyrix_plex_token
+    depends_on:
+      lrclib:
+        condition: service_healthy
+    restart: unless-stopped
+
+secrets:
+  plyrix_plex_token:
+    file: "${PLEX_TOKEN_FILE:-./secrets/plyrix_plex_token}"

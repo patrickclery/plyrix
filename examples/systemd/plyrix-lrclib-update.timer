@@ -1,0 +1,13 @@
+# Example systemd user timer for plyrix-lrclib-update.service: daily, within an hour of midnight.
+# A check is one small request for the dump listing and downloads nothing, unless the listing
+# names a dump newer than the one LRCLIB serves. Persistent=true runs a missed check at boot.
+[Unit]
+Description=Check daily for a newer LRCLIB dump
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

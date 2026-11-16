@@ -1,0 +1,62 @@
+name: Bug report
+description: Something plyrix did wrong, or a check that failed.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are public. Before you paste anything, remove:
+
+        - lyrics, of any length;
+        - tokens, such as a Plex token;
+        - private paths: replace each one with a placeholder such as `/srv/music`;
+        - library listings, such as `--verbose` output or folder listings.
+
+        A normal run's counts lines and `plyrix doctor` hold none of these.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of plyrix doctor
+      description: Run `plyrix doctor` with the same settings and paste its lines.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: counts
+    attributes:
+      label: Report counts
+      description: The `name=value` counts lines a normal run prints, or the `counts` from `--report`. Not `--verbose` output.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How plyrix is installed
+      options:
+        - container image
+        - PyPI package
+        - checkout
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: plyrix version
+      description: The image tag, `plyrix_version` in a `--report` file, or `uv tool list`.
+    validations:
+      required: true
+  - type: checkboxes
+    id: removed
+    attributes:
+      label: Before you submit
+      options:
+        - label: I removed lyrics, tokens, private paths and library listings from everything above.
+          required: true

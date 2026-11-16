@@ -1,0 +1,11 @@
+# Example systemd user timer for plyrix.service: weekly, Mondays at 03:00.
+# Persistent=true runs a missed run at the next boot.
+[Unit]
+Description=Run plyrix weekly
+
+[Timer]
+OnCalendar=Mon *-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

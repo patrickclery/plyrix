@@ -1,0 +1,78 @@
+---
+title: plyrix
+description: plyrix gives a self-hosted Plex music library time-synced lyrics from your own LRCLIB database, and never touches an audio file.
+template: splash
+hero:
+  tagline: 'plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file.'
+  actions:
+    - text: Get started
+      link: /plyrix/docs/install/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/patrickclery/plyrix
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<div class="plyrix-lines" aria-hidden="true">
+  <span></span>
+  <span></span>
+  <span class="now"></span>
+  <span></span>
+</div>
+
+## How it works
+
+<Steps>
+
+1. **Load LRCLIB from the official dump.** Run a local [LRCLIB](https://github.com/tranxuanthang/lrclib) server and load it with LRCLIB's own database dump. Every lookup stays on your machine.
+
+2. **Run plyrix on your library.** It reads each track's tags, finds its lyrics in LRCLIB, and writes a `.lrc` sidecar beside the track for synced lyrics, or a `.txt` for plain ones.
+
+3. **Refresh the album in Plex.** A library scan doesn't attach new sidecars, but an album refresh does. `plyrix plex-refresh` asks your local Plex server to refresh each album that gained one, and the lyrics scroll with playback.
+
+</Steps>
+
+## Never touches an audio file
+
+plyrix writes only `.lrc` and `.txt` files beside your audio, and the promise is enforced in layers:
+
+<CardGrid>
+  <Card title="A tag reader with no write path">
+    Tags are read with a library that has no code to write them.
+  </Card>
+  <Card title="A runtime write tripwire">
+    A Python audit hook stops the run at any write-style operation in the library other than plyrix's own sidecar writes.
+  </Card>
+  <Card title="Import-linter contracts">
+    The module that reads audio and the module that writes sidecars can never import each other.
+  </Card>
+  <Card title="Byte-identity tests">
+    Tests check that every audio file is byte-for-byte unchanged after a run, and CI runs them on every change.
+  </Card>
+</CardGrid>
+
+## Bring your own LRCLIB
+
+<CardGrid>
+  <Card title="No lyrics shipped">
+    plyrix ships no lyrics and no data. It writes sidecars on your own machine, from your own copy of LRCLIB, and every lookup stays local.
+  </Card>
+  <Card title="Download the dump from LRCLIB">
+    Get LRCLIB's database dump yourself from [lrclib.net/db-dumps](https://lrclib.net/db-dumps). Each dump is about 49 GB compressed.
+  </Card>
+  <Card title="319.8 GB first load">
+    The disk peak of a first LRCLIB load, apparent size, with the download kept until LRCLIB was ready; 129.6 GB on disk on ZFS with lz4. Measured 2026-11-11.
+  </Card>
+</CardGrid>
+
+## Install
+
+<CardGrid>
+  <LinkCard title="Install guide" href="/plyrix/docs/install/" description="Disk space, LRCLIB, the package and the container." />
+  <LinkCard title="PyPI package" href="https://pypi.org/project/plyrix/" description="uv tool install plyrix" />
+  <LinkCard title="Container image" href="https://github.com/patrickclery/plyrix/pkgs/container/plyrix" description="ghcr.io/patrickclery/plyrix for linux/amd64 and linux/arm64" />
+  <LinkCard title="Related projects" href="/plyrix/docs/related-projects/" description="LRCLIB, and a GUI option." />
+</CardGrid>

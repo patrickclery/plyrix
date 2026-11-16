@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a change or a new feature.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        plyrix stays local-only: its lyrics come from your own LRCLIB server, loaded from the official dump. It never writes audio files or their tags, only `.lrc` and `.txt` sidecars beside them. Requests that need another lyrics source or a write to audio are out of scope.
+
+        Don't paste lyrics, tokens, private paths or library listings.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve
+      description: What you are trying to do, and what gets in the way today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like
+      description: How you would like plyrix to behave. It stays local-only and never writes audio.
+    validations:
+      required: false

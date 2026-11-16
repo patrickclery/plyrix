@@ -1,0 +1,23 @@
+# A compose override for a Lidarr in its own container, which hands imports to plyrix through a
+# shared spool folder. Lidarr's Custom Script connection runs examples/lidarr/lidarr-spool.sh, and
+# plyrix's container runs `plyrix drain` on DRAIN_SCHEDULE. Use it with:
+#
+#   docker compose -f compose.yaml -f examples/lidarr/compose.lidarr.yaml up -d
+#
+# Variables, beside compose.yaml's own:
+#   LIDARR_SPOOL    a host folder also mounted into Lidarr's container at /plyrix-spool (required).
+#                   Lidarr's user writes it, and plyrix's CONTAINER_USER reads and removes from
+#                   it, so use one uid for both. Never share plyrix's STATE_DIR with Lidarr.
+#   LIDARR_MUSIC    the library's path inside Lidarr's container (default /music)
+#   DRAIN_SCHEDULE  when to run queued albums (default every 5 minutes)
+#
+# Never mount the Docker socket into Lidarr's container: that gives Lidarr root on the host.
+services:
+  plyrix:
+    environment:
+      PLYRIX_LIDARR_SPOOL: /plyrix-spool
+      # Lidarr's view of the library, mapped onto plyrix's.
+      PLYRIX_LIDARR_PATH_MAP: '["${LIDARR_MUSIC:-/music}=${MUSIC_ROOT}"]'
+      DRAIN_SCHEDULE: "${DRAIN_SCHEDULE:-*/5 * * * *}"
+    volumes:
+      - "${LIDARR_SPOOL:?set LIDARR_SPOOL to the folder shared with Lidarr}:/plyrix-spool"

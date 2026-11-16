@@ -1,0 +1,281 @@
+[project]
+name = "plyrix"
+version = "0.1.0"
+description = "Time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+keywords = ["lyrics", "lrc", "plex", "lrclib", "self-hosted", "synced-lyrics"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+  "tinytag==2.3.2",
+  "requests>=2.34,<3",
+  "pydantic-settings>=2.16,<3",
+  "typer>=0.27,<0.28",
+  "platformdirs>=4.14,<5",
+  "urllib3>=2.8,<3",
+]
+
+[project.scripts]
+plyrix = "plyrix.cli:app"
+
+[project.urls]
+Homepage = "https://patrickclery.com/plyrix/"
+Source = "https://github.com/patrickclery/plyrix"
+Issues = "https://github.com/patrickclery/plyrix/issues"
+Changelog = "https://github.com/patrickclery/plyrix/releases"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.17,<0.18",
+  "mypy>=2.4,<3",
+  "pytest>=9.2,<10",
+  "pytest-cov>=7.1,<8",
+  "hypothesis>=6.170,<7",
+  "responses>=0.26,<0.27",
+  "import-linter>=2.15,<3",
+  "pyyaml>=6.0,<7",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "S", "TID"]
+
+# Early feedback in an editor or a lint step. Ruff sees these names and no others, and only as
+# module-level names: not an instance method such as Path.write_text, and not a bare open().
+# sqlite3 isn't here, since state/db.py needs it and a per-file ignore would turn the whole rule
+# off there. tests/test_boundaries.py holds the per-module check, which covers those, and states
+# what it can't see. test_ruff_holds_every_name_the_ast_check_bans keeps the two in step.
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"mutagen".msg = "plyrix must not depend on a tag writer"
+"mediafile".msg = "plyrix must not depend on a tag writer"
+"beets".msg = "plyrix must not depend on beets"
+"beetsplug".msg = "plyrix must not depend on beets"
+"tinytag".msg = "only plyrix.tags may import tinytag"
+"builtins.open".msg = "only sidecars.py may write; see tests/test_boundaries.py"
+"io.open".msg = "only sidecars.py may write"
+"os.open".msg = "only sidecars.py may write"
+"os.fdopen".msg = "only sidecars.py may write"
+"os.link".msg = "only sidecars.py may write"
+"os.symlink".msg = "only sidecars.py may write"
+"os.rename".msg = "only sidecars.py may write"
+"os.renames".msg = "only sidecars.py may write"
+"os.replace".msg = "only sidecars.py may write"
+"os.remove".msg = "only sidecars.py may write"
+"os.unlink".msg = "only sidecars.py may write"
+"os.truncate".msg = "only sidecars.py may write"
+"os.ftruncate".msg = "only sidecars.py may write"
+"os.utime".msg = "only sidecars.py may write"
+"os.chmod".msg = "only sidecars.py may write"
+"os.chown".msg = "only sidecars.py may write"
+"os.rmdir".msg = "only sidecars.py may write"
+"os.removedirs".msg = "only sidecars.py may write"
+"os.write".msg = "only sidecars.py may write"
+"os.pwrite".msg = "only sidecars.py may write"
+"os.writev".msg = "only sidecars.py may write"
+"os.pwritev".msg = "only sidecars.py may write"
+"os.sendfile".msg = "only sidecars.py may write"
+"os.copy_file_range".msg = "only sidecars.py may write"
+"os.posix_fallocate".msg = "only sidecars.py may write"
+"os.splice".msg = "only sidecars.py may write"
+"os.mkdir".msg = "only sidecars.py may write"
+"os.makedirs".msg = "only sidecars.py may write"
+"os.fchmod".msg = "only sidecars.py may write"
+"os.lchmod".msg = "only sidecars.py may write"
+"os.fchown".msg = "only sidecars.py may write"
+"os.lchown".msg = "only sidecars.py may write"
+"os.setxattr".msg = "only sidecars.py may write"
+"os.removexattr".msg = "only sidecars.py may write"
+"os.mkfifo".msg = "only sidecars.py may write"
+"os.mknod".msg = "only sidecars.py may write"
+"os.fork".msg = "plyrix does not spawn processes"
+"os.forkpty".msg = "plyrix does not spawn processes"
+"os.posix_spawn".msg = "plyrix does not spawn processes"
+"os.posix_spawnp".msg = "plyrix does not spawn processes"
+"os.system".msg = "plyrix does not spawn processes"
+"os.popen".msg = "plyrix does not spawn processes"
+"os.execl".msg = "plyrix does not spawn processes"
+"os.execle".msg = "plyrix does not spawn processes"
+"os.execlp".msg = "plyrix does not spawn processes"
+"os.execlpe".msg = "plyrix does not spawn processes"
+"os.execv".msg = "plyrix does not spawn processes"
+"os.execve".msg = "plyrix does not spawn processes"
+"os.execvp".msg = "plyrix does not spawn processes"
+"os.execvpe".msg = "plyrix does not spawn processes"
+"os.spawnl".msg = "plyrix does not spawn processes"
+"os.spawnle".msg = "plyrix does not spawn processes"
+"os.spawnlp".msg = "plyrix does not spawn processes"
+"os.spawnlpe".msg = "plyrix does not spawn processes"
+"os.spawnv".msg = "plyrix does not spawn processes"
+"os.spawnve".msg = "plyrix does not spawn processes"
+"os.spawnvp".msg = "plyrix does not spawn processes"
+"os.spawnvpe".msg = "plyrix does not spawn processes"
+"io.FileIO".msg = "only sidecars.py may write"
+"_io".msg = "only sidecars.py may write"
+"posix".msg = "only sidecars.py may write"
+"importlib".msg = "plyrix does not import modules by name"
+"multiprocessing".msg = "plyrix does not spawn processes"
+"logging.FileHandler".msg = "only sidecars.py may write"
+"shutil".msg = "only sidecars.py may write"
+"tempfile".msg = "plyrix temp files are created by sidecars.py only"
+"subprocess".msg = "plyrix does not spawn processes"
+"pty".msg = "plyrix does not spawn processes"
+"mmap".msg = "only sidecars.py may write"
+"fileinput".msg = "only sidecars.py may write"
+"ctypes".msg = "plyrix loads no native code"
+
+[tool.ruff.lint.per-file-ignores]
+"src/plyrix/tags.py" = ["TID251"]
+"src/plyrix/sidecars.py" = ["TID251"]
+"tests/**" = ["TID251", "S"]
+"scripts/**" = ["TID251", "S"]
+
+[tool.importlinter]
+root_package = "plyrix"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+id = "no-tag-writers"
+name = "no tag-writing library anywhere"
+type = "forbidden"
+source_modules = ["plyrix"]
+forbidden_modules = ["mutagen", "mediafile", "beets", "beetsplug"]
+allow_indirect_imports = false
+
+[[tool.importlinter.contracts]]
+id = "read-write-independent"
+name = "tags and sidecars never see each other"
+type = "independence"
+modules = ["plyrix.tags", "plyrix.sidecars"]
+
+[[tool.importlinter.contracts]]
+id = "tinytag-only-in-tags"
+name = "tinytag only in tags"
+type = "forbidden"
+source_modules = [
+  "plyrix.cli",
+  "plyrix.pipeline",
+  "plyrix.sidecars",
+  "plyrix.walker",
+  "plyrix.domain",
+  "plyrix.state.db",
+  "plyrix.lrclib",
+  "plyrix.config",
+  "plyrix.guard",
+  "plyrix.matching",
+  "plyrix.lrc",
+  "plyrix._lay_folds",
+  "plyrix.report",
+  "plyrix.plex",
+  "plyrix.refresh",
+  "plyrix.doctor",
+  "plyrix.lidarr",
+  "plyrix.hook",
+  "plyrix.spool",
+  "plyrix.dumps",
+  "plyrix.state.lrclib_db",
+  "plyrix.dbupdate",
+]
+forbidden_modules = ["tinytag"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+id = "pure-core"
+name = "domain does no I/O"
+type = "forbidden"
+source_modules = ["plyrix.domain", "plyrix.matching", "plyrix.lrc", "plyrix._lay_folds"]
+forbidden_modules = ["os", "pathlib", "sqlite3", "requests", "tinytag", "plyrix.sidecars"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+id = "sidecars-only-from-pipeline"
+name = "only pipeline may import sidecars"
+type = "forbidden"
+source_modules = [
+  "plyrix.cli",
+  "plyrix.walker",
+  "plyrix.tags",
+  "plyrix.state.db",
+  "plyrix.domain",
+  "plyrix.lrclib",
+  "plyrix.config",
+  "plyrix.guard",
+  "plyrix.matching",
+  "plyrix.lrc",
+  "plyrix._lay_folds",
+  "plyrix.report",
+  "plyrix.plex",
+  "plyrix.refresh",
+  "plyrix.doctor",
+  "plyrix.lidarr",
+  "plyrix.hook",
+  "plyrix.spool",
+  "plyrix.dumps",
+  "plyrix.state.lrclib_db",
+  "plyrix.dbupdate",
+]
+forbidden_modules = ["plyrix.sidecars"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+id = "plex-side-apart"
+name = "plex side never reaches the tag reader or the writer"
+type = "forbidden"
+source_modules = ["plyrix.plex", "plyrix.refresh", "plyrix.doctor"]
+forbidden_modules = ["plyrix.tags", "plyrix.sidecars", "plyrix.walker", "plyrix.pipeline"]
+allow_indirect_imports = false
+
+# The LRCLIB update reads LRCLIB's files and writes only the state database (criterion 4).
+[[tool.importlinter.contracts]]
+id = "lrclib-update-side-apart"
+name = "lrclib update side never reaches the library"
+type = "forbidden"
+source_modules = ["plyrix.dumps", "plyrix.state.lrclib_db", "plyrix.dbupdate"]
+forbidden_modules = ["plyrix.tags", "plyrix.sidecars", "plyrix.walker", "plyrix.pipeline"]
+allow_indirect_imports = false
+
+[[tool.importlinter.contracts]]
+id = "plex-client-http-only"
+name = "the plex client is HTTP only"
+type = "forbidden"
+source_modules = ["plyrix.plex"]
+forbidden_modules = ["plyrix.state", "sqlite3"]
+allow_indirect_imports = false
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+# Lets a run on one file find plyrix and conftest. Without this it caches them as missing, and
+# a later `mypy src tests` reports errors from that cache that no code change clears.
+mypy_path = "src:tests"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "real_samples: needs real audio samples copied under the scratch area, never run in hosted CI",
+  "lrclib_contract: needs a live self-hosted LRCLIB at the pinned revision, never run in hosted CI",
+  "plex_contract: needs a local Plex Media Server, read-only, never run in hosted CI",
+  "docker_image: needs the locally built plyrix:local image, never run in hosted CI",
+  "lidarr_e2e: needs Docker, the local linuxserver/lidarr image and a local LRCLIB, never run in hosted CI",
+  "lrclib_update: needs Docker and the locally built pinned LRCLIB image, never run in hosted CI",
+]

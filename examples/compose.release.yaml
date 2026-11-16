@@ -1,0 +1,11 @@
+# Run the released plyrix image instead of building one. Use it on top of compose.yaml:
+#
+#   docker compose -f compose.yaml -f examples/compose.release.yaml up -d
+#
+# Only plyrix changes. LRCLIB is still built from the pinned upstream commit in compose.yaml, as
+# its image is never published.
+services:
+  plyrix:
+    image: ghcr.io/patrickclery/plyrix:0.1.0
+    build: !reset null
+    pull_policy: missing

@@ -1,0 +1,140 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14", "3.15"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Install gitleaks
+        env:
+          GITLEAKS_URL: https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/gitleaks"
+          mkdir -p "$dir"
+          curl -fsSLo "$dir/gitleaks.tar.gz" "$GITLEAKS_URL"
+          echo "$GITLEAKS_SHA256  $dir/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf "$dir/gitleaks.tar.gz" -C "$dir" gitleaks
+          rm "$dir/gitleaks.tar.gz"
+          echo "$dir" >>"$GITHUB_PATH"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.7"
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked
+      - run: uv run pytest
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.7"
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src tests
+      - run: uv run lint-imports
+
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install gitleaks
+        env:
+          GITLEAKS_URL: https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          dir="$RUNNER_TEMP/gitleaks"
+          mkdir -p "$dir"
+          curl -fsSLo "$dir/gitleaks.tar.gz" "$GITLEAKS_URL"
+          echo "$GITLEAKS_SHA256  $dir/gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf "$dir/gitleaks.tar.gz" -C "$dir" gitleaks
+          rm "$dir/gitleaks.tar.gz"
+          echo "$dir" >>"$GITHUB_PATH"
+      # Default gitleaks rules only: the maintainer's private list stays local (D-08), so the
+      # scan warns that it found none and runs the default ruleset.
+      - run: scripts/scan-private.sh tree
+      - run: scripts/scan-private.sh history
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.7"
+          python-version: "3.14"
+      - name: Audit the workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: uvx zizmor==1.32.0 --format plain .github/workflows
+
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: plyrix:local
+          provenance: false
+          sbom: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.7"
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: PLYRIX_DOCKER_GATE=1 uv run pytest tests/gates/test_image.py -m docker_image
+      - uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
+        with:
+          image: plyrix:local
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: table

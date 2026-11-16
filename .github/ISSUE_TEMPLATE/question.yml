@@ -1,0 +1,17 @@
+name: Question or concern
+description: Ask a question, or raise a concern about plyrix, its lyrics or the LRCLIB dump.
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        plyrix ships no lyrics and no data. It writes `.lrc` and `.txt` sidecars on your own machine, from your own copy of LRCLIB, which you download from https://lrclib.net/db-dumps. Report a security problem privately through https://github.com/patrickclery/plyrix/security/advisories/new instead.
+
+        Don't paste lyrics, tokens, private paths or library listings.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question or concern
+      description: What you want to know, or what worries you.
+    validations:
+      required: true

@@ -1,0 +1,12 @@
+# An allow-list: everything is left out of the build context, then the few paths the image needs
+# are let back in. The working tree holds gitignored private files, and a build context ignores
+# .gitignore, so a deny-list here would have to name each of them and would miss the next one.
+*
+!src/
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!docker/
+**/__pycache__
+**/*.pyc
