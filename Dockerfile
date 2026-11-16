@@ -6,9 +6,9 @@
 # syntax line, as that would pull an unpinned frontend image. The build context is the allow-list
 # in .dockerignore, and every COPY below names its paths.
 
-FROM astral/uv:0.13.7@sha256:96f40d3904aad8d0bd010539001d36c8e2188b981e1334471a90c4a1d93bb490 AS uv
+FROM astral/uv:0.13.8@sha256:5cc1805e2426484abca4ad46ea783bab281fdb225fd82d8ce6d66a81254bac85 AS uv
 
-FROM python:3.14-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f AS build
+FROM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS build
 COPY --from=uv /uv /usr/local/bin/uv
 ENV UV_PROJECT_ENVIRONMENT=/opt/plyrix \
     UV_COMPILE_BYTECODE=1 \
@@ -22,7 +22,7 @@ COPY src ./src
 RUN uv sync --locked --no-dev --no-editable --python /usr/local/bin/python3
 
 # supercronic is fetched in its own stage, so curl stays out of the runtime image.
-FROM python:3.14-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f AS fetch
+FROM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS fetch
 ARG TARGETARCH
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -37,7 +37,7 @@ RUN set -eu; \
     echo "$sum  /supercronic" | sha256sum -c -; \
     chmod 0755 /supercronic
 
-FROM python:3.14-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+FROM python:3.15-slim-trixie@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928
 # tini is PID 1: plyrix installs no SIGTERM handler, and supercronic reaps only as PID 1.
 # zlib1g is upgraded from trixie-security, as the pinned base still has the build grype fails on
 # (CVE-2026-76844, CVE-2026-85091); drop the upgrade once a base digest carries +deb13u1.
