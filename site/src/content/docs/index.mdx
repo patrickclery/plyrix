@@ -1,9 +1,9 @@
 ---
 title: plyrix
-description: plyrix gives a self-hosted Plex music library time-synced lyrics from your own LRCLIB database, and never touches an audio file.
+description: plyrix gives your Plex music library lyrics from your own self-hosted LRCLIB database, and never touches an audio file.
 template: splash
 hero:
-  tagline: 'plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file.'
+  tagline: 'Why rely on lyrics services that track your metadata? Download the entire LRCLIB database once and host it locally.'
   actions:
     - text: Get started
       link: /plyrix/docs/install/
@@ -63,8 +63,8 @@ plyrix writes only `.lrc` and `.txt` files beside your audio, and the promise is
   <Card title="Download the dump from LRCLIB">
     Get LRCLIB's database dump yourself from [lrclib.net/db-dumps](https://lrclib.net/db-dumps). Each dump is about 49 GB compressed.
   </Card>
-  <Card title="319.8 GB first load">
-    The disk peak of a first LRCLIB load, apparent size, with the download kept until LRCLIB was ready; 129.6 GB on disk on ZFS with lz4. Measured 2026-11-11.
+  <Card title="Disk space for the first load">
+    The download, about 49 GB, unpacks into LRCLIB's database, and both sit on disk until LRCLIB is ready, so a first load peaks at 319.8 GB apparent size, or 129.6 GB on disk on ZFS with lz4. Measured 2026-11-11.
   </Card>
 </CardGrid>
 

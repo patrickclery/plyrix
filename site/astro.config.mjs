@@ -6,7 +6,7 @@ import { defineConfig, passthroughImageService } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
 const lead =
-  'plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file.';
+  'Why rely on lyrics services that track your metadata? Download the entire LRCLIB database once and host it locally.';
 
 export default defineConfig({
   site: 'https://patrickclery.com',

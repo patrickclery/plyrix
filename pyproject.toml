@@ -1,7 +1,7 @@
 [project]
 name = "plyrix"
 version = "0.1.0"
-description = "Time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file."
+description = "Lyrics for your Plex music library from your own self-hosted LRCLIB database, without touching an audio file."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

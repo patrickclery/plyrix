@@ -12,7 +12,7 @@ const DIST = join(SITE, 'dist');
 const README = readFileSync(join(SITE, '..', 'README.md'), 'utf8');
 const BRAND = join(SITE, '..', 'assets', 'brand');
 const LEAD =
-  'plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file.';
+  'Why rely on lyrics services that track your metadata? Download the entire LRCLIB database once and host it locally.';
 const DISCLAIMER = 'plyrix is an independent project, not affiliated with or endorsed by Plex, Inc.';
 // The same pattern as tests/test_lyric_leak.py's TIMESTAMPED_LINE.
 const TIMESTAMPED_LINE = /^\s*\[\d{1,2}:\d{2}([.:]\d{1,3})?\]/;

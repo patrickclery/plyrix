@@ -231,8 +231,8 @@ def test_the_governance_docs_pass() -> None:
 
 README = ROOT / "README.md"
 LEAD = (
-    "plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, "
-    "without touching an audio file."
+    "Why rely on lyrics services that track your metadata? "
+    "Download the entire LRCLIB database once and host it locally."
 )
 DISCLAIMER = "plyrix is an independent project, not affiliated with or endorsed by Plex, Inc."
 SOURCE_NOTE = re.compile(r"measured \d{4}-\d{2}-\d{2}", re.IGNORECASE)

@@ -5,9 +5,9 @@
   <img src="assets/brand/lockup.svg" alt="plyrix">
 </picture>
 
-plyrix: time-synced lyrics for your Plex music library, from your own LRCLIB database, without touching an audio file.
+Why rely on lyrics services that track your metadata? Download the entire LRCLIB database once and host it locally.
 
-It walks a library and writes a `.lrc` beside each track that has synced lyrics and a `.txt` for plain-only ones, and a `.txt` it didn't write is never replaced. plyrix ships no lyrics and no data: you download LRCLIB's database dump yourself, from https://lrclib.net/db-dumps, and every lookup stays on your machine. Tested on ZFS on Linux only.
+plyrix gives your Plex music library lyrics from your own LRCLIB database, without touching an audio file. It walks a library and writes a `.lrc` beside each track that has synced lyrics and a `.txt` for plain-only ones, and a `.txt` it didn't write is never replaced. plyrix ships no lyrics and no data: you download LRCLIB's database dump yourself, from https://lrclib.net/db-dumps, and every lookup stays on your machine. Tested on ZFS on Linux only.
 
 Try it on a copy of your library first, for example a copy at `/srv/music`.
 
