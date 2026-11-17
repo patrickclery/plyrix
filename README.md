@@ -9,6 +9,9 @@ Why rely on lyrics services that track your metadata? Download the entire LRCLIB
 
 plyrix gives your Plex music library lyrics from your own LRCLIB database, without touching an audio file. It walks a library and writes a `.lrc` beside each track that has synced lyrics and a `.txt` for plain-only ones, and a `.txt` it didn't write is never replaced. plyrix ships no lyrics and no data: you download LRCLIB's database dump yourself, from https://lrclib.net/db-dumps, and every lookup stays on your machine. Tested on ZFS on Linux only.
 
+> [!WARNING]
+> ⚠️ plyrix is for people with a lot of disk space. LRCLIB's database dump is about 49 GB to download, and a first load peaks at 319.8 GB while the download and the unpacked database sit side by side. Measured 2026-11-11.
+
 Try it on a copy of your library first, for example a copy at `/srv/music`.
 
 ## Audio safety

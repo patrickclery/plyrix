@@ -14,7 +14,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { Aside, Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 
 <div class="plyrix-lines" aria-hidden="true">
   <span></span>
@@ -22,6 +22,10 @@ import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
   <span class="now"></span>
   <span></span>
 </div>
+
+<Aside type="caution" title="⚠️ You need a lot of disk space">
+plyrix is for people with a lot of disk space. LRCLIB's database dump is about 49 GB to download, and a first load peaks at 319.8 GB while the download and the unpacked database sit side by side. Measured 2026-11-11.
+</Aside>
 
 ## How it works
 
